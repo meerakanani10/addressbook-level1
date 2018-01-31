@@ -10,6 +10,7 @@ package seedu.addressbook;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -484,14 +485,28 @@ public class AddressBook {
      */
     private static ArrayList<String[]> getPersonsWithNameContainingAnyKeyword(Collection<String> keywords) {
         final ArrayList<String[]> matchedPersons = new ArrayList<>();
+        ArrayList<String> nameSplitByWhiteSpace = new ArrayList<>();
+        ArrayList<String> lowerCaseNames = new ArrayList<>();
+        Set<String> loweredKeywords = new HashSet<>();
         for (String[] person : getAllPersonsInAddressBook()) {
-            final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person)));
-            if (!Collections.disjoint(wordsInName, keywords)) {
+            nameSplitByWhiteSpace = splitByWhitespace(getNameFromPerson(person));
+            for (String split : nameSplitByWhiteSpace) {
+                lowerCaseNames.add(makeLowerCase(split));
+            }
+            final Set<String> wordsInName = new HashSet<>(lowerCaseNames);
+            for (String keyword : keywords) {
+                loweredKeywords.add(makeLowerCase(keyword));
+            }
+            if (!Collections.disjoint(lowerCaseNames, loweredKeywords)) {
                 matchedPersons.add(person);
+                lowerCaseNames.clear();
             }
         }
         return matchedPersons;
     }
+
+
+
 
     /**
      * Deletes person identified using last displayed index.
@@ -1163,5 +1178,10 @@ public class AddressBook {
     private static ArrayList<String> splitByWhitespace(String toSplit) {
         return new ArrayList<>(Arrays.asList(toSplit.trim().split("\\s+")));
     }
+
+    private static String makeLowerCase(String partOfName) {
+        return partOfName.toLowerCase();
+    }
+
 
 }
